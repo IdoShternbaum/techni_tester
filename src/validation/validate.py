@@ -1,16 +1,18 @@
 from pathlib import Path
 
+from test_validation import TestValidator
+
 CMAKE_TXT = "CMakeLists.txt"
 CMAKE_DEBUG = "cmake-build-debug"
-COMPILE_CMD = "compile_commands.json"
+CMAKE_CACHE = "CMakeCache.txt"
 
 
 class Validate:
-    def __init__(self):
-        self.proj_path = Path.cwd()
+    def __init__(self, project_path=None):
+        self.proj_path = Path(project_path).resolve() if project_path else Path.cwd()
         self.cmake_txt = self.proj_path / CMAKE_TXT
         self.cmake_debug = self.proj_path / CMAKE_DEBUG
-        self.cmpl_cmd_path = self.cmake_debug / COMPILE_CMD
+        self.cache_path = self.cmake_debug / CMAKE_CACHE
 
     def check(self) -> bool:
         if not self.cmake_txt.is_file():
@@ -23,9 +25,10 @@ class Validate:
                 f"CMake build directory not found: {self.cmake_debug}"
             )
 
-        if not self.cmpl_cmd_path.is_file():
+        if not self.cache_path.is_file():
             raise FileNotFoundError(
-                f"Compilation database not found: {self.cmpl_cmd_path}"
+                f"CMake cache not found: {self.cache_path}"
             )
 
+        TestValidator(self.proj_path).check()
         return True

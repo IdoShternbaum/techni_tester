@@ -1,45 +1,35 @@
-import json
-from typing import Any
+from pathlib import Path
 
 from validation import Validate
 
 
 class Configure(Validate):
-
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, project_path=None):
+        super().__init__(project_path)
         self.check()
-        self.commands = self.parse_json()
+        self.cmake_command = self.find_cmake()
+        self.compiler = self.find_compiler()
 
-        self.command = self.commands.get("command")
-        self.directory = self.commands.get("directory")
+    def find_compiler(self):
+        with self.cache_path.open("r", encoding="utf-8-sig") as cache:
+            for line in cache:
+                if line.startswith("CMAKE_C_COMPILER:FILEPATH="):
+                    value = line.rstrip("\r\n").partition("=")[2]
+                    return Path(value) if value else None
+        return None
 
-        if not self.can_compile():
-            raise ValueError(
-                "Configure error!\n"
-                "Missing or invalid compiler command!\n"
-            )
-
-    def parse_json(self) -> dict:
-        with self.cmpl_cmd_path.open("r", encoding="utf-8") as file:
-            data = json.load(file)
-
-        if isinstance(data, dict):
-            return data
-
-        if isinstance(data, list) and data:
-            return data[0]
-
-        raise ValueError(
-            "Configure error!\n"
-            f"{self.cmpl_cmd_path} is not a valid config file!\n"
-        )
-
-
-    @staticmethod
-    def is_valid(x:Any) -> bool:
-        return isinstance(x, str) and bool(x.strip())
-
-    def can_compile(self) -> bool:
-        return self.is_valid(self.command) and self.is_valid(self.directory)
+    def find_cmake(self) -> Path:
+        with self.cache_path.open("r", encoding="utf-8-sig") as cache:
+            for line in cache:
+                if line.startswith("CMAKE_COMMAND:INTERNAL="):
+                    value = line.rstrip("\r\n").partition("=")[2]
+                    if not value:
+                        break
+                    cmake = Path(value)
+                    if not cmake.is_file():
+                        raise FileNotFoundError(
+                            f"CMake executable recorded in {self.cache_path} "
+                            f"does not exist: {cmake}"
+                        )
+                    return cmake
+        raise ValueError(f"CMAKE_COMMAND not found in CMake cache: {self.cache_path}")
