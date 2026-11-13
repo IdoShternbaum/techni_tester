@@ -4,7 +4,7 @@ from pathlib import Path
 
 class TestValidator:
     def __init__(self, project_path):
-        self.testing_dir = Path(project_path) / "tests"
+        self.tests_dir = Path(project_path) / "tests"
 
     def check(self):
         for path in self.find_test_files():
@@ -13,12 +13,12 @@ class TestValidator:
                 self.validate_test(test, path, index)
 
     def find_test_files(self):
-        if not self.testing_dir.is_dir():
-            raise NotADirectoryError(f"Testing directory not found: {self.testing_dir}")
+        if not self.tests_dir.is_dir():
+            raise NotADirectoryError(f"Tests directory not found: {self.tests_dir}")
 
-        json_files = sorted(self.testing_dir.glob("*.json"))
+        json_files = sorted(self.tests_dir.glob("*.json"))
         if not json_files:
-            raise FileNotFoundError(f"No JSON test files found in: {self.testing_dir}")
+            raise FileNotFoundError(f"No JSON test files found in: {self.tests_dir}")
         return json_files
 
     @staticmethod
