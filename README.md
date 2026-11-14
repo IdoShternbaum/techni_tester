@@ -19,13 +19,19 @@ Test results
 
 ### 1. Install
 
-You need Python 3.9 or newer, pip, and a CMake project that has already been configured with a working C compiler. From this repository's directory, run:
+You need Python 3.9 or newer, pip, and a CMake project that has already been configured with a working C compiler.
+
+If you are using PyCharm's terminal, it may activate the project's virtual environment automatically. Run `deactivate` first so that `--user` installs the command for your user account. If the virtual environment activates again when you open a terminal, disable **Activate virtualenv** in PyCharm's terminal settings or use a terminal outside PyCharm.
+
+From this repository's directory, run:
 
 ```powershell
 python -m pip install --user .
 ```
 
 The `--user` option installs the tool for your Windows user account instead of system-wide. Python's user scripts directory must be on your `PATH` for the `techni-tester` command to work. If pip reports that the scripts directory is not on `PATH`, add the directory it names to your user `PATH` and restart your terminal.
+
+Alternatively, to install only inside an active virtual environment, omit `--user` and run `python -m pip install .`. The command will be available while that environment is active.
 
 For development, use `python -m pip install --user -e .` instead. The `-e` option makes the installation editable, so changes to the Python source are available without reinstalling.
 
